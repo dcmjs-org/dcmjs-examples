@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="user-scalable=no, width=device-width, initial-scale=1, maximum-scale=1"
+    />
+
+    <link href="../css/bootstrap.min.css" rel="stylesheet" />
+    <link href="../css/cornerstone.min.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header">
+        <h1>Display DICOM Segmentation IOD</h1>
+        <p>
+          This example demonstrates how to display a DICOM Segmentation object.
+        </p>
+        <a href="../index.html">Go back to the Examples page</a>
+      </div>
+
+      <div class="row">
+        <button id="sampleData" onclick="getAndLoadSeg()">
+          Get Sample Data
+        </button>
+        <p id="statusLine"></p>
+        <div class="col-xs-9">
+          <div
+            style="width:512px;height:512px;position:relative;display:inline-block;"
+            oncontextmenu="return false"
+            class="cornerstone-enabled-image"
+            unselectable="on"
+            onselectstart="return false;"
+            onmousedown="return false;"
+          >
+            <!-- TODO => Replace this with react cornerstone viewport -->
+            <div
+              id="cornerstoneViewport"
+              style="width:512px;height:512px;top:0px;left:0px; position:absolute;"
+            ></div>
+          </div>
+          <p>
+            Sample data is from the dicom4qi connectathon event to be held at
+            RSNA 2017. This is
+            <a
+              href="https://qiicr.gitbooks.io/dicom4qi/content/instructions/seg.html#test-dataset-2"
+              >test dataset #2</a
+            >
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script src="../js/jquery.min.js"></script>
+    <script src="../js/jqueryFileDrop.js"></script>
+
+    <script src="https://unpkg.com/cornerstone-core@2.2.6/dist/cornerstone.js"></script>
+    <script src="https://unpkg.com/cornerstone-math@0.1.6/dist/cornerstoneMath.js"></script>
+    <script src="https://unpkg.com/cornerstone-tools@3.0.0-b.1585/dist/cornerstoneTools.js"></script>
+
+    <script src="https://unpkg.com/dicom-parser/dist/dicomParser.js"></script>
+    <script src="https://unpkg.com/cornerstone-wado-image-loader/dist/cornerstoneWADOImageLoader.min.js"></script>
+    <script src="https://unpkg.com/hammerjs/hammer.min.js"></script>
+
+    <script src="../js/initCornerstone.js"></script>
+
+    <script src="https://unpkg.com/dcmjs"></script>
+
+    <script
+      src="https://unpkg.com/react@16/umd/react.development.js"
+      crossorigin
+    ></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+
+    <script>
+      "use strict";
+
+      var process = {
+        env: {
+          NODE_ENV: "production"
+        }
+      };
+
+      window.process = process;
+    </script>
+
+    <!--
+      <script src='node_modules/react-viewerbase/dist/index.js'></script>!
+    -->
+    <script src="https://unpkg.com/react-cornerstone-viewport/dist/index.umd.js"></script>
+
+    <script>
+      let metaData = {};
+
+      function getAndLoadSeg() {
+        var segURL =
+          "https://s3.amazonaws.com/IsomicsPublic/SampleData/rsna2017/seg/task2/SEG/tumor_User1_Manual_Trial1.dcm";
+
+        const xhr = new XMLHttpRequest();
+
+        xhr.addEventListener("load", () => {
+          parseSeg(xhr.response);
+        });
+
+        xhr.addEventListener("error", () => {
+          console.log(`Request returned, status: ${xhr.status}`);
+          console.log(xhr.message);
+        });
+
+        xhr.open("GET", segURL);
+        xhr.responseType = "arraybuffer"; //Type of file
+
+        xhr.send();
+      }
+
+      function parseSeg(arrayBuffer) {
+        const element = document.getElementsByClassName("viewport-element")[0];
+
+        const stackToolState = cornerstoneTools.getToolState(element, "stack");
+        const imageIds = stackToolState.data[0].imageIds;
+
+        const {
+          toolState,
+          segMetadata
+        } = dcmjs.adapters.Cornerstone.Segmentation.readToolState(
+          imageIds,
+          arrayBuffer
+        );
+
+        cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(
+          toolState
+        );
+        const brushModule = cornerstoneTools.store.modules.brush;
+
+        for (let i = 0; i < segMetadata.length; i++) {
+          modules.brush.setters.metadata(seriesInstanceUid, i, segMetadata[i]);
+        }
+      }
+
+      function addMetaData(type, imageId, data) {
+        metaData[imageId] = metaData[imageId] || {};
+        metaData[imageId][type] = data;
+      }
+
+      //
+      // creates an array of per-frame imageIds in the form needed for cornerstone processing.
+      //
+      function getImageIds(multiframe, baseImageId) {
+        const imageIds = [];
+        const numFrames = Number(multiframe.NumberOfFrames);
+        for (let i = 0; i < numFrames; i++) {
+          let segNum;
+          if (
+            multiframe.PerFrameFunctionalGroupsSequence[i]
+              .SegmentIdentificationSequence
+          ) {
+            segNum =
+              multiframe.PerFrameFunctionalGroupsSequence[i]
+                .SegmentIdentificationSequence.ReferencedSegmentNumber;
+          }
+          const imageId = baseImageId + "?frame=" + i;
+          imageIds.push(imageId);
+        }
+        return imageIds;
+      }
+
+      //
+      // uses cornerstone caching to access a bytearray of the
+      // part10 dicom, then uses dcmjs to parse this
+      // into javascript object and populates the
+      // metadata for the per-frame imageIDs.
+      //
+      function loadMultiFrameAndPopulateMetadata(baseImageId) {
+        return new Promise(function(resolve, reject) {
+          var multiframe;
+          cornerstone.loadAndCacheImage(baseImageId).then(function(image) {
+            var arrayBuffer = image.data.byteArray.buffer;
+
+            dicomData = dcmjs.data.DicomMessage.readFile(arrayBuffer);
+            let dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(
+              dicomData.dict
+            );
+            dataset._meta = dcmjs.data.DicomMetaDictionary.namifyDataset(
+              dicomData.meta
+            );
+
+            multiframe = dcmjs.normalizers.Normalizer.normalizeToDataset([
+              dataset
+            ]);
+
+            const numFrames = Number(multiframe.NumberOfFrames);
+            for (let i = 0; i < numFrames; i++) {
+              const imageId = baseImageId + "?frame=" + i;
+
+              var functionalGroup =
+                multiframe.PerFrameFunctionalGroupsSequence[i];
+              var imagePositionArray =
+                functionalGroup.PlanePositionSequence.ImagePositionPatient;
+
+              addMetaData("imagePlane", imageId, {
+                imagePositionPatient: {
+                  x: imagePositionArray[0],
+                  y: imagePositionArray[1],
+                  z: imagePositionArray[2]
+                }
+              });
+            }
+
+            resolve(multiframe);
+          });
+        });
+      }
+    </script>
+
+    <script>
+      "use strict";
+
+      var baseURL =
+        "https://s3.amazonaws.com/IsomicsPublic/SampleData/rsna2017/seg/task2/";
+      var baseImageId = "dicomweb:" + baseURL + "PT-multiframe.dcm";
+
+      loadMultiFrameAndPopulateMetadata(baseImageId)
+        .then(value => {
+          var exampleData = {
+            stack: {
+              currentImageIdIndex: 0,
+              imageIds: getImageIds(value, baseImageId)
+            }
+          };
+
+          var CornerstoneViewport = window["react-cornerstone-viewport"];
+          var props = {
+            viewportData: exampleData,
+            cornerstone,
+            cornerstoneTools,
+            activeTool: "Brush"
+          };
+
+          var app = React.createElement(CornerstoneViewport, props, null);
+
+          ReactDOM.render(app, document.getElementById("cornerstoneViewport"));
+        })
+        .catch(err => console.log(err));
+    </script>
+  </body>
+</html>
