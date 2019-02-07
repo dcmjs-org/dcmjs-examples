@@ -1,17 +1,18 @@
 <div align="center">
-  <h1>dcmjs</h1>
+  <h1>dcmjs-examples</h1>
 
-  <p>JavaScript implementation of DICOM manipulation. This code is an outgrowth of several efforts to implement web applications for medical imaging.</p>
+  <p>Demonstrates the use of <a href="https://dcmjs-org/dcmjs">dcmjs</a> JavaScript implementation of DICOM manipulation. This code is an outgrowth of several efforts to implement web applications for medical imaging.</p>
 </div>
 
 <hr />
 
 **Note: this code is a work-in-progress and should not be used for production or clinical purposes**
 
-See [live examples here](https://dcmjs-org.github.io/dcmjs/examples/)
+See [live examples here](https://examples.dcmjs.org)
 
 ## Codebase
-The dcmjs [codebase is available here](https://github.com/dcmjs-org/dcmjs)
+* The dcmjs [codebase is available here](https://github.com/dcmjs-org/dcmjs)
+* The dcmjs-examples [codebase is available here](https://github.com/dcmjs-org/dcmjs-examples)
 
 
 ## Support
