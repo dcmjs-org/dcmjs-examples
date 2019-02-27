@@ -91,11 +91,13 @@
           metadata = metadata.filter(m => m);
           const viewer = new DICOMMicroscopyViewer.api.VLWholeSlideMicroscopyImageViewer({client,metadata});
 
-          var container = document.getElementById("root");
+          const container = document.getElementById("dicomImage");
           viewer.render({ container });
 
           viewer.activateDrawInteraction({ geometryType: "polygon" });
           window.viewer = viewer;
+          document.addEventListener('dicommicroscopyviewer_roi_added', (event) => {console.log(event.detail)});
+          document.addEventListener('dicommicroscopyviewer_dicom_move_end', (event) => {console.log(event.detail)});
 
         });
 
@@ -130,7 +132,7 @@
             onmousedown="return false;"
           >
             <div
-              id="root"
+              id="dicomImage"
               style="width:512px;height:512px;top:0px;left:0px; position:absolute; border: 1px solid black;"
             ></div>
           </div>
