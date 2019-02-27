@@ -37,21 +37,6 @@
     <script src="http://localhost:3000/node_modules/dcmjs/build/dcmjs.js"></script>
     <script>
       
-      $(document).ready(() => {
-
-        $('#downloadReport').click((event) => {
-          const rois = viewer.getAllROIs();
-          if(rois.length === 0){
-            alert('Please, draw an are of interest first.');
-            return;
-          }
-          const report = MeasurementReport.generateReport(rois);
-          const reportBlob = dcmjs.data.datasetToBlob(report.dataset);
-          saveAs(reportBlob, "report.dcm", true);
-        });
-
-      });
-
       const url = "https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/rs";
       const client = new DICOMwebClient.api.DICOMwebClient({ url });
       const studyInstanceUID = "1.2.392.200140.2.1.1.1.2.799008771.2448.1519719572.518";
@@ -94,9 +79,11 @@
           const container = document.getElementById("dicomImage");
           viewer.render({ container });
 
-          viewer.activateDrawInteraction({ geometryType: "polygon" });
+          viewer.activateDrawInteraction({ geometryType: "circle" });
           window.viewer = viewer;
-          
+          document.addEventListener('dicommicroscopyviewer_roi_added', (event) => {console.log(event.detail)});
+          document.addEventListener('dicommicroscopyviewer_dicom_move_end', (event) => {console.log(event.detail)});
+
         });
 
       window.dcmjs = dcmjs;
@@ -110,40 +97,40 @@
     <div class="container">
       <div class="page-header">
         <h1>
-          Microscopy viewer to Structured Report
+          Microscopy viewer Events Handler
         </h1>
         <p>
-          This example demonstrates how to create a DICOM Structured Report
-          object from microscopy viewer.
+          This example demonstrates how to interact with Microscopy Events.
         </p>
         <a href="../../index.html">Go back to the Examples page</a>
       </div>
 
-      <div class="row">
-        <div class="col-xs-9" id="dropZone">
-          <div
-            style="width:512px;height:512px;position:relative;display:inline-block;"
-            oncontextmenu="return false"
-            class="cornerstone-enabled-image"
-            unselectable="on"
-            onselectstart="return false;"
-            onmousedown="return false;"
-          >
-            <div
-              id="dicomImage"
-              style="width:512px;height:512px;top:0px;left:0px; position:absolute; border: 1px solid black;"
-            ></div>
+      <div class="bs-example" data-example-id="simple-thumbnails">
+        <div class="row">
+          <div class="col-xs-6 col-md-3">
+            <a href="#" class="thumbnail">
+              actions
+            </a>
           </div>
-        </div>
-
-        <div class="col-xs-3">
-          <div class="row">
-            <input
-              type="button"
-              class="dicomControls"
-              id="downloadReport"
-              value="Download Structured Report"
-            />
+          <div class="col-xs-6 col-md-6" >
+            <div
+              style="width:512px;height:512px;position:relative;display:inline-block;"
+              oncontextmenu="return false"
+              class="cornerstone-enabled-image"
+              unselectable="on"
+              onselectstart="return false;"
+              onmousedown="return false;"
+            >
+              <div
+                id="dicomImage"
+                style="width:512px;height:512px;top:0px;left:0px; position:absolute; border: 1px solid black;"
+              ></div>
+            </div>
+          </div>
+          <div class="col-xs-6 col-md-3">
+            <a href="#" class="thumbnail">
+              asdf
+            </a>
           </div>
         </div>
       </div>
