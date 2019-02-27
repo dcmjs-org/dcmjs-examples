@@ -36,6 +36,44 @@
     <script src="http://localhost:3000/build/dicom-microscopy-viewer.js"></script>
     <script src="http://localhost:3000/node_modules/dcmjs/build/dcmjs.js"></script>
     <script>
+
+      $(document).ready(() => {
+        
+        // Tool selection
+        $("#tools-list li a").on('click',(event)=> {
+          const geometryType = event.target.id;
+          $("#tools-list li.active").removeClass("active");
+          window.viewer.activateDrawInteraction({ geometryType });
+          $(`#${geometryType}`).parent().attr("class", "active");
+        });
+
+        // Event list   
+        $("#event-list a").on("click",(event)=> {
+          const eventType = event.target.id;
+
+          if($(`#${eventType}`).hasClass("active")){
+            document.removeEventListener(`dicommicroscopyviewer_${eventType}`, logEvent);
+          }else{            
+            addEventListener(eventType);
+          }
+          $(`#${eventType}`).toggleClass("active");
+        });
+
+      });
+
+      function addEventListener(eventType){
+        document.addEventListener(`dicommicroscopyviewer_${eventType}`, logEvent);
+      }
+
+      function logEvent(event) {
+        const content = event.detail;
+        $("#log a.active").removeClass("active");
+        const new_event = `<a class="list-group-item active">
+                            <h4 class="list-group-item-heading">eventType: ${content.payload.type}</h4>
+                            <p class="list-group-item-text">${content.time}</p>
+                          </a>`
+        $("#log").prepend(new_event);
+      }
       
       const url = "https://server.dcmjs.org/dcm4chee-arc/aets/DCM4CHEE/rs";
       const client = new DICOMwebClient.api.DICOMwebClient({ url });
@@ -79,18 +117,16 @@
           const container = document.getElementById("dicomImage");
           viewer.render({ container });
 
-          viewer.activateDrawInteraction({ geometryType: "circle" });
+          viewer.activateDrawInteraction({ geometryType: "point" });
           window.viewer = viewer;
-          document.addEventListener('dicommicroscopyviewer_roi_added', (event) => {console.log(event.detail)});
-          document.addEventListener('dicommicroscopyviewer_dicom_move_end', (event) => {console.log(event.detail)});
-
+         
         });
 
       window.dcmjs = dcmjs;
       const MeasurementReport = dcmjs.adapters.DICOMMicroscopyViewer.MeasurementReport;
+      addEventListener('dicom_move_started');
+      addEventListener('dicom_move_ended');
 
-      // var rois = [viewer.getROI(0)]
-      //MeasurementReport.generateReport(rois);
     </script>
   </body>
   <body>
@@ -107,14 +143,29 @@
 
       <div class="bs-example" data-example-id="simple-thumbnails">
         <div class="row">
-          <div class="col-xs-6 col-md-3">
-            <a href="#" class="thumbnail">
-              actions
-            </a>
+          <div class="col-xs-6 col-md-2">
+            <div class="list-group" id="event-list">              
+              <a id="roi_added" class="list-group-item">ROI Added</a>
+              <a id="roi_removed" class="list-group-item">ROI Removed</a>
+              <a id="roi_drawn" class="list-group-item">ROI Drawn</a>
+              <a id="roi_selected" class="list-group-item">ROI Selected</a>
+              <a id="roi_modified" class="list-group-item">ROI Modified</a>
+              <a id="dicom_move_started" class="list-group-item active">Move Started</a>
+              <a id="dicom_move_ended" class="list-group-item active">Move Ended</a>
+            </div>
           </div>
-          <div class="col-xs-6 col-md-6" >
+          <div class="col-xs-6 col-md-7" >
+            <ul class="nav nav-pills" id="tools-list">
+              <li role="presentation" class="active"><a id="point">Point</a></li>
+              <li role="presentation"><a id="circle">Circle</a></li>
+              <li role="presentation"><a id="box">Box</a></li>
+              <li role="presentation"><a id="polygon">Polygon</a></li>
+              <li role="presentation"><a id="freehandpolygon">Freehand Polygon</a></li>
+              <li role="presentation"><a id="line">Line</a></li>
+              <li role="presentation"><a id="freehandline">Freehand Line</a></li>
+            </ul>
             <div
-              style="width:512px;height:512px;position:relative;display:inline-block;"
+              style="width:100%;height:512px;position:relative;display:inline-block;"
               oncontextmenu="return false"
               class="cornerstone-enabled-image"
               unselectable="on"
@@ -123,17 +174,23 @@
             >
               <div
                 id="dicomImage"
-                style="width:512px;height:512px;top:0px;left:0px; position:absolute; border: 1px solid black;"
+                style="width:100%;height:512px;top:0px;left:0px; position:absolute; border: 1px solid black;"
               ></div>
             </div>
           </div>
           <div class="col-xs-6 col-md-3">
-            <a href="#" class="thumbnail">
-              asdf
-            </a>
+            <div class="list-group scrollable" id="log">
+              
+            </div>
           </div>
         </div>
       </div>
     </div>
+    <style>
+    .scrollable {
+      height: 530px;
+      overflow-y: scroll;
+    }
+    </style>
   </body>
 </html>
