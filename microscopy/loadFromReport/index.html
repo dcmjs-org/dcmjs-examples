@@ -182,26 +182,24 @@
                   
                   tools.forEach(t => {
                     const properties = {}
-                    let coordinates = toolState[t].reduce((all,one,i) => {
-                      const ch = Math.floor(i/3)
-                      all[ch] = [].concat((all[ch]||[]),one)
-                      return all
-                    }, [])
-
+                    const coordinates = toolState[t]
                     let scoord3d;
 
-                    if(t === 'Polygon' || t === 'Polyline'){
-                      scoord3d = new DICOMMicroscopyViewer.scoord3d.Polyline(coordinates);
-                    }else if(t === 'Point'){
-                      scoord3d = new DICOMMicroscopyViewer.scoord3d.Point(coordinates[0]);
-                    }else if(t === 'Circle'){
-                      scoord3d = new DICOMMicroscopyViewer.scoord3d.Circle(coordinates);
-                    }else{
-                      throw new Error('Unsuported tool type')
-                    }
+                    coordinates.forEach(coord => {
+                      if(t === 'Polygon' || t === 'Polyline'){
+                        scoord3d = new DICOMMicroscopyViewer.scoord3d.Polyline(coord);
+                      }else if(t === 'Point'){
+                        scoord3d = new DICOMMicroscopyViewer.scoord3d.Point(coord);
+                      }else if(t === 'Circle'){
+                        scoord3d = new DICOMMicroscopyViewer.scoord3d.Circle(coord);
+                      }else{
+                        throw new Error('Unsupported tool type')
+                      }
 
-                    const roi = new DICOMMicroscopyViewer.roi.ROI({scoord3d , properties});
-                    rois.push(roi)
+                      const roi = new DICOMMicroscopyViewer.roi.ROI({scoord3d , properties});
+                      rois.push(roi)
+                    })
+
 
                   })
                   
