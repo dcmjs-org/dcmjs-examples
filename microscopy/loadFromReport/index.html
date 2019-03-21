@@ -162,21 +162,21 @@
             </div>
           </div>
           <div class="col-xs-6 col-md-3">
-            <div class="alert alert-warning text-center" role="alert">
-              Download Report
-            </div>
-            <div class="list-group">
-              <!--file input example -->
-              <span class="control-fileupload">
-                <!-- <input type="file" onchange="handleFileSelect(event)" /><br /> -->
-                <input type='file' onchange='openFile(event)'>
-              </span>
+              <div class="bs-callout bs-callout-info" id="callout-navs-tabs-plugin">
+                <h4>Upload a Segmentation Report file</h4>
+                <p>You can either take <a href="report.dcm" download="report.dcm">this file</a> as an example or upload yours.</p>
+                <!--file input example -->
+                <span class="control-fileupload">
+                  <!-- <input type="file" onchange="handleFileSelect(event)" /><br /> -->
+                  <input type='file' onchange='openFile(event)'>
+                </span>
+              </div>
               <script>
 
                 function getROIFromToolState(toolState){
                   const tools = Object.getOwnPropertyNames(toolState)
-                    
-                  console.log(tools)
+                  
+                  console.log(toolState)  
 
                   const rois = [];
                   
@@ -187,7 +187,7 @@
 
                     coordinates.forEach(coord => {
                       if(t === 'Polygon' || t === 'Polyline'){
-                        scoord3d = new DICOMMicroscopyViewer.scoord3d.Polyline(coord);
+                        scoord3d = new DICOMMicroscopyViewer.scoord3d.Polygon(coord);
                       }else if(t === 'Point'){
                         scoord3d = new DICOMMicroscopyViewer.scoord3d.Point(coord);
                       }else if(t === 'Circle'){
@@ -200,12 +200,10 @@
                       rois.push(roi)
                     })
 
-
                   })
                   
                   return rois
                 }
-                
 
                 const openFile = function(event) {
                   const input = event.target;
@@ -216,22 +214,30 @@
                     const arrayBuffer = reader.result;
                     dicomData = dcmjs.data.DicomMessage.readFile(arrayBuffer);
                     const dataset = dcmjs.data.DicomMetaDictionary.naturalizeDataset(dicomData.dict);
-                    console.log(dataset)
                     const toolState = MeasurementReport.generateToolState(dataset);
-                    console.log(toolState)
                     const rois = getROIFromToolState(toolState)
-                    rois.forEach(roi => viewer.addROI(roi))
-                    
+                    rois.forEach(roi => viewer.addROI(roi))                    
                   };
                   
                   reader.readAsArrayBuffer(input.files[0]);
                 }
 
               </script>
-            </div>
           </div>
         </div>
       </div>
     </div>
+    <style>
+    .bs-callout-info {
+        border-left-color: #1b809e;
+    }
+
+    .bs-callout {
+        padding: 20px;
+        border: 1px solid #1b809e;
+        border-left-width: 5px;
+        border-radius: 3px;
+    }
+    </style>
   </body>
 </html>
