@@ -34,7 +34,7 @@
     <script src="https://unpkg.com/dicomweb-client"></script>
     <script src="../../js/FileSaver.min.js"></script>
     <script src="https://unpkg.com/dicom-microscopy-viewer"></script>
-    <script src="https://unpkg.com/dcmjs@latest"></script>
+    <script src="https://unpkg.com/dcmjs"></script>
     
     <script>
 
@@ -134,7 +134,7 @@
       <div class="bs-example" data-example-id="simple-thumbnails">
         <div class="row">
           
-          <div class="col-xs-6 col-md-9" >
+          <div class="col-xs-12 col-md-9" >
             <div class="alert alert-warning text-center" role="alert">Select below the tool you want to use to draw</div>
             <ul class="nav nav-pills" id="tools-list">
               <li role="presentation" class="active"><a id="polygon">Polygon</a></li>
@@ -146,7 +146,19 @@
               <li role="presentation"><a id="freehandline">Freehand Line</a></li>
             </ul>
             <br/>
-            <div
+            
+          </div>
+          <div class="col-xs-12 col-md-3">
+            <div class="alert alert-warning text-center" role="alert">Structured Report</div>
+            <div class="list-group">
+                <input 
+                    type="button" class="btn btn-primary center-block" id="downloadReport" 
+                    value="Download"
+                    />
+            </div>
+          </div>
+          <div class="col-xs-12 col-md-12">
+              <div
               style="width:100%;height:550px;position:relative;display:inline-block;"
               oncontextmenu="return false"
               class="cornerstone-enabled-image"
@@ -159,16 +171,6 @@
                 style="width:100%;height:550px;top:0px;left:0px; position:absolute; border: 1px solid black;"
               ></div>
 
-            </div>
-            
-          </div>
-          <div class="col-xs-6 col-md-3">
-            <div class="alert alert-warning text-center" role="alert">Download Report</div>
-            <div class="list-group">
-                <input 
-                    type="button" class="btn btn-primary" id="downloadReport" 
-                    value="Download Structured Report"
-                    />
             </div>
           </div>
         </div>
