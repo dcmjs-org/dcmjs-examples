@@ -127,7 +127,7 @@
 
       <div class="bs-example" data-example-id="simple-thumbnails">
         <div class="row">
-          <div class="col-xs-6 col-md-9">
+          <div class="col-xs-12 col-md-9">
             <div class="alert alert-warning text-center" role="alert">
               Select below the tool you want to use to draw
             </div>
@@ -147,21 +147,8 @@
               </li>
             </ul>
             <br />
-            <div
-              style="width:100%;height:550px;position:relative;display:inline-block;"
-              oncontextmenu="return false"
-              class="cornerstone-enabled-image"
-              unselectable="on"
-              onselectstart="return false;"
-              onmousedown="return false;"
-            >
-              <div
-                id="dicomImage"
-                style="width:100%;height:550px;top:0px;left:0px; position:absolute; border: 1px solid black;"
-              ></div>
-            </div>
           </div>
-          <div class="col-xs-6 col-md-3">
+          <div class="col-xs-12 col-md-3">
               <div class="bs-callout bs-callout-info" id="callout-navs-tabs-plugin">
                 <h4>Upload a Structured Report file</h4>
                 <p>You can either take <a href="report.dcm" download="report.dcm">this file</a> as an example or upload yours.</p>
@@ -171,6 +158,7 @@
                   <input type='file' onchange='openFile(event)'>
                 </span>
               </div>
+              <br />
               <script>
 
                 function getROIFromToolState(toolState){
@@ -223,6 +211,21 @@
                 }
 
               </script>
+          </div>
+          <div class="col-xs-12 col-md-12">
+              <div
+                style="width:100%;height:550px;position:relative;display:inline-block;"
+                oncontextmenu="return false"
+                class="cornerstone-enabled-image"
+                unselectable="on"
+                onselectstart="return false;"
+                onmousedown="return false;"
+              >
+                <div
+                  id="dicomImage"
+                  style="width:100%;height:550px;top:0px;left:0px; position:absolute; border: 1px solid black;"
+                ></div>
+              </div>
           </div>
         </div>
       </div>
