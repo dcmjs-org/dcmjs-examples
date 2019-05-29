@@ -539,6 +539,7 @@ return Object.freeze({ newInstance, extend, SlicingMode });
         // segments are non-opaque at value 0, and fully opaque at 255
         range = [0,255];
         lowRangeOpacity = 0;
+        volume.getProperty().setInterpolationTypeToNearest(); // Only for labels
       }
       sotf.addPoint(range[0], lowRangeOpacity);
       sotf.addPoint(range[1], 1);
